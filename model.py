@@ -6,6 +6,7 @@ import numpy as np
 import tensorflow as tf
 from past.builtins import xrange
 import time as tim
+from sklearn.metrics import precision_recall_fscore_support as score
 
 class MemN2N(object):
     def __init__(self, config, sess):
@@ -195,6 +196,8 @@ class MemN2N(object):
       context.fill(self.pad_idx)
 
       m, acc = 0, 0
+      overall_predictions = []
+
       for i in xrange(N):
         target.fill(0)
         time.fill(self.mem_size)
@@ -226,10 +229,17 @@ class MemN2N(object):
                                                      self.context: context,
                                                      self.mask: mask})
 
+        overall_predictions.append(predictions)
+
         for b in xrange(self.batch_size):
           if raw_labels[b] == predictions[b]:
             acc = acc + 1
 
+      precision, recall, f1, support = score(target_label, overall_predictions)
+      print('precision: {}'.format(precision))
+      print('recall: {}'.format(recall))
+      print('fscore: {}'.format(f1))
+      print('support: {}'.format(support))
       return cost, acc/float(len(source_data))
 
     def run(self, train_data, test_data):

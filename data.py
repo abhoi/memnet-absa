@@ -158,6 +158,7 @@ def load_and_clean():
 
     print('tech_reviews shape: ' + str(tech_reviews.shape))
     print('food_reviews shape: ' + str(food_reviews.shape))
+
     return tech_reviews, food_reviews
 
 def sub_list_finder(sentence, aspect):
@@ -215,6 +216,8 @@ def get_dataset(data_file_name, sent_word2idx, target_word2idx, embeddings, MODE
 
     tech_reviews, food_reviews = load_and_clean()
 
+    tech_reviews = tech_reviews.sample(frac=1).reset_index(drop=True)
+
     text = np.array(tech_reviews['text'])
     aspects = np.array(tech_reviews['aspect_term'])
     polarities = np.array(tech_reviews['class'])
@@ -223,9 +226,9 @@ def get_dataset(data_file_name, sent_word2idx, target_word2idx, embeddings, MODE
     target_error_counter = 0
     if MODE == 'train':
         lower_bound = 0
-        upper_bound = int(math.ceil(text.shape[0] * 0.8))
+        upper_bound = int(math.ceil(text.shape[0] * 0.9))
     else:
-        lower_bound = int(math.ceil(text.shape[0] * 0.8)) + 1
+        lower_bound = int(math.ceil(text.shape[0] * 0.9)) + 1
         upper_bound = text.shape[0]
 
 
@@ -388,7 +391,6 @@ def get_dataset(data_file_name, sent_word2idx, target_word2idx, embeddings, MODE
     #         target_list.append(target_index)
     #         polarity_list.append(polarity)
     print('target_error_counter: ' + str(target_error_counter))
-    print('all okay')
     # print(np.array(sentence_list).shape)
     # print(np.array(location_list).shape)
     # print(np.array(target_list).shape)
