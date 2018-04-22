@@ -2,6 +2,7 @@ from nltk import word_tokenize
 from collections import Counter
 from nltk.corpus import stopwords
 import string
+import math
 
 from keras.preprocessing.text import text_to_word_sequence
 
@@ -41,8 +42,8 @@ def get_dataset_resources(data_file_name, sent_word2idx, target_word2idx, word_s
 
     tech_reviews, food_reviews = load_and_clean()
 
-    text = np.array(food_reviews['text'])
-    aspects = np.array(food_reviews['aspect_term'])
+    text = np.array(tech_reviews['text'])
+    aspects = np.array(tech_reviews['aspect_term'])
     t_sentences = np.array(map(lambda x, y: replace_with_token(x, y), text, aspects))
 
     word_count = []
@@ -155,8 +156,8 @@ def load_and_clean():
     tech_reviews['text'] = tech_reviews['text'].str.replace("\[comma\]", ',')
     food_reviews['text'] = food_reviews['text'].str.replace("\[comma\]", ',')
 
-    # print('tech_reviews shape: ' + str(tech_reviews.shape))
-    # print('food_reviews shape: ' + str(food_reviews.shape))
+    print('tech_reviews shape: ' + str(tech_reviews.shape))
+    print('food_reviews shape: ' + str(food_reviews.shape))
     return tech_reviews, food_reviews
 
 def sub_list_finder(sentence, aspect):
@@ -214,18 +215,22 @@ def get_dataset(data_file_name, sent_word2idx, target_word2idx, embeddings, MODE
 
     tech_reviews, food_reviews = load_and_clean()
 
-    text = np.array(food_reviews['text'])
-    aspects = np.array(food_reviews['aspect_term'])
-    polarities = np.array(food_reviews['class'])
+    text = np.array(tech_reviews['text'])
+    aspects = np.array(tech_reviews['aspect_term'])
+    polarities = np.array(tech_reviews['class'])
     t_sentences = np.array(map(lambda x, y: replace_with_token(x, y), text, aspects))
 
     target_error_counter = 0
     if MODE == 'train':
         lower_bound = 0
-        upper_bound = 1849
+        upper_bound = int(math.ceil(text.shape[0] * 0.8))
     else:
-        lower_bound = 1850
-        upper_bound = 2312
+        lower_bound = int(math.ceil(text.shape[0] * 0.8)) + 1
+        upper_bound = text.shape[0]
+
+
+    print('lower_bound: ' + str(lower_bound))
+    print('upper_bound: ' + str(upper_bound))
 
     # for i in range(t_sentences.shape[0]):
     for i in range(lower_bound, upper_bound):
