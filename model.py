@@ -124,6 +124,7 @@ class MemN2N(object):
       tf.initialize_all_variables().run()
 
       self.correct_prediction = tf.argmax(self.z, 1)
+      # self.correct_prediction for predict
 
     def train(self, data):
       source_data, source_loc_data, target_data, target_label = data

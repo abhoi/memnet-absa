@@ -69,7 +69,7 @@ def main(_):
         model = MemN2N(FLAGS, sess)
         model.build_model()
         model.run(train_data, test_data)
-
+    # for i in 10, do <-. Before model =...use tf.reset_default_graph
 
 if __name__ == '__main__':
     tf.app.run()
