@@ -231,7 +231,8 @@ def get_dataset(data_file_name, sent_word2idx, target_word2idx, embeddings, MODE
         lower_bound = int(math.ceil(text.shape[0] * 0.8)) + 1
         upper_bound = text.shape[0]
 
-
+    #lower_bound = 0
+    #upper_bound = text.shape[0]
     print('lower_bound: ' + str(lower_bound))
     print('upper_bound: ' + str(upper_bound))
 
