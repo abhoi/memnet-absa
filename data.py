@@ -226,9 +226,9 @@ def get_dataset(data_file_name, sent_word2idx, target_word2idx, embeddings, MODE
     target_error_counter = 0
     if MODE == 'train':
         lower_bound = 0
-        upper_bound = int(math.ceil(text.shape[0] * 0.9))
+        upper_bound = int(math.ceil(text.shape[0] * 0.8))
     else:
-        lower_bound = int(math.ceil(text.shape[0] * 0.9)) + 1
+        lower_bound = int(math.ceil(text.shape[0] * 0.8)) + 1
         upper_bound = text.shape[0]
 
 
