@@ -13,9 +13,9 @@ flags = tf.app.flags
 
 flags.DEFINE_integer("edim", 300, "internal state dimension [300]")
 flags.DEFINE_integer("lindim", 300, "linear part of the state [75]")
-flags.DEFINE_integer("nhop", 9, "number of hops [7]")
+flags.DEFINE_integer("nhop", 2, "number of hops [7]")
 flags.DEFINE_integer("batch_size", 1, "batch size to use during training [128]")
-flags.DEFINE_integer("nepoch", 50, "number of epoch to use during training [100]")
+flags.DEFINE_integer("nepoch", 10, "number of epoch to use during training [100]")
 flags.DEFINE_float("init_lr", 0.01, "initial learning rate [0.01]")
 flags.DEFINE_float("init_hid", 0.1, "initial internal state value [0.1]")
 flags.DEFINE_float("init_std", 0.01, "weight initialization std [0.05]")
