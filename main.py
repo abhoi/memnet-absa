@@ -16,7 +16,7 @@ flags.DEFINE_integer("edim", 300, "internal state dimension [300]")
 flags.DEFINE_integer("lindim", 300, "linear part of the state [75]")
 flags.DEFINE_integer("nhop", 7, "number of hops [7]")
 flags.DEFINE_integer("batch_size", 1, "batch size to use during training [128]")
-flags.DEFINE_integer("nepoch", 10, "number of epoch to use during training [100]")
+flags.DEFINE_integer("nepoch", 1, "number of epoch to use during training [100]")
 flags.DEFINE_float("init_lr", 0.01, "initial learning rate [0.01]")
 flags.DEFINE_float("init_hid", 0.1, "initial internal state value [0.1]")
 flags.DEFINE_float("init_std", 0.01, "weight initialization std [0.05]")
@@ -56,7 +56,7 @@ def main(_):
     FLAGS.pre_trained_context_wt, FLAGS.pre_trained_target_wt = get_embedding_matrix(embeddings, source_word2idx,
                                                                                      target_word2idx, FLAGS.edim)
 
-    N_FOLDS = 10
+    N_FOLDS = 2
     skf = StratifiedKFold(N_FOLDS, shuffle=True, random_state=1000)
     train_data = get_dataset(FLAGS.train_data, source_word2idx, target_word2idx, embeddings, MODE='train')
     source_data, source_loc_data, target_data, target_label = train_data
@@ -73,8 +73,14 @@ def main(_):
         with tf.Session() as sess:
             model = MemN2N(FLAGS, sess)
             model.build_model()
+	    saver = tf.train.Saver()
             model.run(train_data_inner, test_data_inner)
+            saver.save(sess, './memnet', global_step=1000)
     # for i in 10, do <-. Before model =...use tf.reset_default_graph
+
+    sess = tf.Session()
+    saver = tf.train.import_meta_graph('./memnet-1000.meta')
+    saver.restore(sess, tf.train.latest_checkpoint('./'))
 
 if __name__ == '__main__':
     tf.app.run()
