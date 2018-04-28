@@ -5,7 +5,7 @@ import tensorflow as tf
 from nltk import word_tokenize
 from data import *
 from model import MemN2N
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, train_test_split
 import numpy as np
 
 pp = pprint.PrettyPrinter()
@@ -16,7 +16,7 @@ flags.DEFINE_integer("edim", 300, "internal state dimension [300]")
 flags.DEFINE_integer("lindim", 300, "linear part of the state [75]")
 flags.DEFINE_integer("nhop", 7, "number of hops [7]")
 flags.DEFINE_integer("batch_size", 1, "batch size to use during training [128]")
-flags.DEFINE_integer("nepoch", 1, "number of epoch to use during training [100]")
+flags.DEFINE_integer("nepoch", 2, "number of epoch to use during training [100]")
 flags.DEFINE_float("init_lr", 0.01, "initial learning rate [0.01]")
 flags.DEFINE_float("init_hid", 0.1, "initial internal state value [0.1]")
 flags.DEFINE_float("init_std", 0.01, "weight initialization std [0.05]")
@@ -62,25 +62,36 @@ def main(_):
     source_data, source_loc_data, target_data, target_label = train_data
     X = np.column_stack((source_data, source_loc_data, target_data))
     y = np.array(target_label)
-    for j, (train_idx, test_idx) in enumerate(skf.split(X, y)):
-        X_train, y_train = X[train_idx], y[train_idx]
-        X_test, y_test = X[test_idx], y[test_idx]
+    
+    # Use this for SKF validation
+    # for j, (train_idx, test_idx) in enumerate(skf.split(X, y)):
+    #     X_train, y_train = X[train_idx], y[train_idx]
+    #     X_test, y_test = X[test_idx], y[test_idx]
 
-        train_data_inner = (X_train[:,0], X_train[:,1], X_train[:,2], y_train)
-        test_data_inner = (X_test[:,0], X_test[:,1], X_test[:,2], y_test)
+    #     train_data_inner = (X_train[:,0], X_train[:,1], X_train[:,2], y_train)
+    #     test_data_inner = (X_test[:,0], X_test[:,1], X_test[:,2], y_test)
 
-        tf.reset_default_graph()
-        with tf.Session() as sess:
-            model = MemN2N(FLAGS, sess)
-            model.build_model()
-	    saver = tf.train.Saver()
-            model.run(train_data_inner, test_data_inner)
-            saver.save(sess, './memnet', global_step=1000)
-    # for i in 10, do <-. Before model =...use tf.reset_default_graph
+    #     tf.reset_default_graph()
+    #     with tf.Session() as sess:
+    #         model = MemN2N(FLAGS, sess)
+    #         model.build_model()
+	   #  saver = tf.train.Saver()
+    #         model.run(train_data_inner, test_data_inner)
+    #         saver.save(sess, './memnet', global_step=1000)
+    # # for i in 10, do <-. Before model =...use tf.reset_default_graph
 
-    sess = tf.Session()
-    saver = tf.train.import_meta_graph('./memnet-1000.meta')
-    saver.restore(sess, tf.train.latest_checkpoint('./'))
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+    train_data_inner = (X_train[:,0], X_train[:,1], X_train[:,2], y_train)
+    test_data_inner = (X_test[:,0], X_test[:,1], X_test[:,2], y_test)
+    with tf.Session() as sess:
+        model = MemN2N(FLAGS, sess)
+        model.build_model()
+        model.run(train_data_inner, test_data_inner)
+
+    # use this to restore model from disk
+    # sess = tf.Session()
+    # saver = tf.train.import_meta_graph('./memnet-1000.meta')
+    # saver.restore(sess, tf.train.latest_checkpoint('./'))
 
 if __name__ == '__main__':
     tf.app.run()
