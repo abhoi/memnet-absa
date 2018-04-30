@@ -258,7 +258,7 @@ class MemN2N(object):
       m = 0
       overall_predictions = []
 
-      for i in xrange(N):
+      for i in xrange(len(data[0])):
         target.fill(0)
         time.fill(self.mem_size)
         context.fill(self.pad_idx)
@@ -271,14 +271,14 @@ class MemN2N(object):
           mask[b,:len(source_data[m])].fill(0)
           m += 1
 
-        predictions = self.sess.run2(self.correct_prediction, feed_dict={self.input: x,
+        predictions = self.sess.run(self.correct_prediction, feed_dict={self.input: x,
                                                      self.time: time,
                                                      self.target: target,
                                                      self.context: context,
                                                      self.mask: mask})
         overall_predictions.append(predictions)
 
-      return predictions
+      return overall_predictions
 
     # def run(self, train_data, test_data):
     def run(self, test_data):
@@ -286,12 +286,15 @@ class MemN2N(object):
       self.sess.run(self.A.assign(self.pre_trained_context_wt))
       self.sess.run(self.ASP.assign(self.pre_trained_target_wt))
 
-      for idx in xrange(self.nepoch):
-        print('epoch '+str(idx)+'...')
+      predictions = self.predict(test_data)
+      print(predictions)
+
+      #for idx in xrange(self.nepoch):
+        #print('epoch '+str(idx)+'...')
         #train_loss, train_acc = self.train(train_data)
         #test_loss, test_acc = self.test(test_data)
-        predictions = self.predict(test_data)
-        print(predictions)
+        #predictions = self.predict(test_data)
+        #print(predictions)
         # print('train-loss=%.2f;train-acc=%.2f;test-acc=%.2f;' % (train_loss, train_acc, test_acc))
         # self.log_loss.append([train_loss, test_loss])
         
