@@ -1,0 +1,2 @@
+model_checkpoint_path: "memnet-food"
+all_model_checkpoint_paths: "memnet-food"

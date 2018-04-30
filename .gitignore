@@ -1,2 +1,5 @@
 # ignore txt
 *.txt
+
+# ignore models
+models/

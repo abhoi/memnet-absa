@@ -12,11 +12,13 @@ import numpy as np
 import os
 import csv
 import xml.etree.ElementTree as ET
-import html
-# import HTMLParser
-from html.parser import HTMLParser
+#import html
+import HTMLParser
+#from html.parser import HTMLParser
 import re
 
+import nltk
+nltk.download('stopwords')
 stop = set(stopwords.words('english'))
 
 def load_embedding_file(embed_file_name, word_set):
@@ -39,8 +41,8 @@ def get_dataset_resources(data_file_name, sent_word2idx, target_word2idx, word_s
 
     tech_reviews, food_reviews = load_and_clean()
 
-    text = np.array(tech_reviews['text'])
-    aspects = np.array(tech_reviews['aspect_term'])
+    text = np.array(food_reviews['text'])
+    aspects = np.array(food_reviews['aspect_term'])
     t_sentences = np.array(map(lambda x, y: replace_with_token(x, y), text, aspects))
 
     word_count = []
@@ -136,11 +138,11 @@ def get_dataset(data_file_name, sent_word2idx, target_word2idx, embeddings, MODE
 
     tech_reviews, food_reviews = load_and_clean()
 
-    tech_reviews = tech_reviews.sample(frac=1).reset_index(drop=True)
+    food_reviews = food_reviews.sample(frac=1).reset_index(drop=True)
 
-    text = np.array(tech_reviews['text'])
-    aspects = np.array(tech_reviews['aspect_term'])
-    polarities = np.array(tech_reviews['class'])
+    text = np.array(food_reviews['text'])
+    aspects = np.array(food_reviews['aspect_term'])
+    polarities = np.array(food_reviews['class'])
     t_sentences = np.array(map(lambda x, y: replace_with_token(x, y), text, aspects))
 
     target_error_counter = 0

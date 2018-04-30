@@ -4,7 +4,7 @@ import math
 import random
 import numpy as np
 import tensorflow as tf
-from past.builtins import xrange
+#from past.builtins import xrange
 import time as tim
 from sklearn.metrics import precision_recall_fscore_support as score
 
