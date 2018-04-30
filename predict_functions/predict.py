@@ -29,6 +29,11 @@ flags.DEFINE_boolean("show", False, "print progress [False]")
 
 FLAGS = flags.FLAGS
 
+def predict_labels(model, test_data):
+    source_data, source_loc_data, target_data = test_data
+    print(model.get_operations())
+
+
 def main(_):
     source_count, target_count = [], []
     source_word2idx, target_word2idx, word_set = {}, {}, {}
@@ -48,7 +53,7 @@ def main(_):
     # print('loading pre-trained word vectors...')
     # print('loading pre-trained word vectors for train and test data')
 
-    # FLAGS.pre_trained_context_wt, FLAGS.pre_trained_target_wt = get_embedding_matrix(embeddings, source_word2idx, target_word2idx, FLAGS.edim)
+    FLAGS.pre_trained_context_wt, FLAGS.pre_trained_target_wt = get_embedding_matrix(embeddings, source_word2idx, target_word2idx, FLAGS.edim)
 
     test_data = get_dataset_test(FLAGS.test_data, source_word2idx, target_word2idx, embeddings)
     # source_data, source_loc_data, target_data = test_data
@@ -61,9 +66,16 @@ def main(_):
 
     with tf.Session() as sess:
         print("accessing model...")
+        model = MemN2N(FLAGS, sess)
+        model.build_model()
         saver = tf.train.import_meta_graph('../models/memnet-' + FLAGS.test_data + '.meta')
         saver.restore(sess, tf.train.latest_checkpoint('../'))
-        model = tf.get_default_graph()
+        model.run(test_data)
+        # model.run(test_data)
+        #model.build_model()
+        #model.run(test_data)
+        # model = tf.get_default_graph()
+        # predict_labels(model, test_data)
         print("model restored!")
         # model = MemN2N(FLAGS, sess)
         # model.build_model()

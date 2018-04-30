@@ -110,7 +110,7 @@ def load_and_clean(dataset):
     else:
         PATH = 'data_2_test.csv'
     # read into pandas csv
-    test_data = pd.read_csv('../data/' + PATH, quoting=csv.QUOTE_NONE, error_bad_lines=False, skipinitialspace=True)
+    test_data = pd.read_csv('../data/' + PATH, error_bad_lines=False, skipinitialspace=True)
 
     # rename columns to remove whitespaces
     test_data.columns = ['example_id', 'text', 'aspect_term', 'term_location']
@@ -167,7 +167,7 @@ def get_dataset_test(data_filename, sent_word2idx, target_word2idx, embeddings):
     		for idx, s in enumerate(sent_words):
     			target_temp = target_words[0]
     		print(sent_words.index(target_temp))
-    		print('target_location = -1')
+    		print('target_location: -1')
     		target_error_counter += 1
 
         is_included_flag = 1
