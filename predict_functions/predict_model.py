@@ -271,6 +271,15 @@ class MemN2N(object):
           mask[b,:len(source_data[m])].fill(0)
           m += 1
 
+        loss = self.sess.run([self.loss],
+                                        feed_dict={
+                                            self.input: x,
+                                            self.time: time,
+                                            self.target: target,
+                                            self.context: context,
+                                            self.mask: mask})
+        cost += np.sum(loss)
+
         predictions = self.sess.run(self.correct_prediction, feed_dict={self.input: x,
                                                      self.time: time,
                                                      self.target: target,
