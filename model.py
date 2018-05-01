@@ -242,7 +242,68 @@ class MemN2N(object):
       print('support: {}'.format(support))
       return cost, acc/float(len(source_data))
 
-    def run(self, train_data, test_data):
+    def predict(self, data):
+      source_data, source_loc_data, target_data = data
+      N = int(math.ceil(len(source_data) / self.batch_size))
+      cost = 0
+
+      x = np.ndarray([self.batch_size, 1], dtype=np.int32)
+      time = np.ndarray([self.batch_size, self.mem_size], dtype=np.int32)
+      target = np.zeros([self.batch_size], dtype=np.int32) 
+      context = np.ndarray([self.batch_size, self.mem_size], dtype=np.int32)
+      mask = np.ndarray([self.batch_size, self.mem_size])
+
+      context.fill(self.pad_idx)
+
+      m, acc = 0, 0
+      overall_predictions = []
+
+      for i in xrange(N):
+        target.fill(0)
+        time.fill(self.mem_size)
+        context.fill(self.pad_idx)
+        mask.fill(-1.0*np.inf)
+        
+        raw_labels = []
+        for b in xrange(self.batch_size):
+          x[b][0] = target_data[m]
+          # target[b] = target_label[m]
+          time[b,:len(source_loc_data[m])] = source_loc_data[m]
+          context[b,:len(source_data[m])] = source_data[m]
+          mask[b,:len(source_data[m])].fill(0)
+          # raw_labels.append(target_label[m])
+          m += 1
+
+        loss = self.sess.run([self.loss],
+                                        feed_dict={
+                                            self.input: x,
+                                            self.time: time,
+                                            self.target: target,
+                                            self.context: context,
+                                            self.mask: mask})
+        cost += np.sum(loss)
+
+        predictions = self.sess.run(self.correct_prediction, feed_dict={self.input: x,
+                                                     self.time: time,
+                                                     self.target: target,
+                                                     self.context: context,
+                                                     self.mask: mask})
+
+        overall_predictions.append(predictions)
+
+        # for b in xrange(self.batch_size):
+        #   if raw_labels[b] == predictions[b]:
+        #     acc = acc + 1
+
+      # precision, recall, f1, support = score(target_label, overall_predictions)
+      # print('precision: {}'.format(precision))
+      # print('recall: {}'.format(recall))
+      # print('fscore: {}'.format(f1))
+      # print('support: {}'.format(support))
+      # return cost, acc/float(len(source_data))
+      return overall_predictions
+
+    def run(self, train_data, test_data, predict_data):
       print('training...')
       self.sess.run(self.A.assign(self.pre_trained_context_wt))
       self.sess.run(self.ASP.assign(self.pre_trained_target_wt))
@@ -253,4 +314,6 @@ class MemN2N(object):
         test_loss, test_acc = self.test(test_data)
         print('train-loss=%.2f;train-acc=%.2f;test-acc=%.2f;' % (train_loss, train_acc, test_acc))
         self.log_loss.append([train_loss, test_loss])
+      predictions = self.predict(predict_data)
+      print(predictions)
         

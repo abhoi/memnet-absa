@@ -41,8 +41,8 @@ def get_dataset_resources(data_file_name, sent_word2idx, target_word2idx, word_s
 
     tech_reviews, food_reviews = load_and_clean()
 
-    text = np.array(food_reviews['text'])
-    aspects = np.array(food_reviews['aspect_term'])
+    text = np.array(tech_reviews['text'])
+    aspects = np.array(tech_reviews['aspect_term'])
     t_sentences = np.array(map(lambda x, y: replace_with_token(x, y), text, aspects))
 
     word_count = []
@@ -138,11 +138,11 @@ def get_dataset(data_file_name, sent_word2idx, target_word2idx, embeddings, MODE
 
     tech_reviews, food_reviews = load_and_clean()
 
-    food_reviews = food_reviews.sample(frac=1).reset_index(drop=True)
+    # tech_reviews = tech_reviews.sample(frac=1).reset_index(drop=True)
 
-    text = np.array(food_reviews['text'])
-    aspects = np.array(food_reviews['aspect_term'])
-    polarities = np.array(food_reviews['class'])
+    text = np.array(tech_reviews['text'])
+    aspects = np.array(tech_reviews['aspect_term'])
+    polarities = np.array(tech_reviews['class'])
     t_sentences = np.array(map(lambda x, y: replace_with_token(x, y), text, aspects))
 
     target_error_counter = 0
@@ -218,3 +218,164 @@ def get_dataset(data_file_name, sent_word2idx, target_word2idx, embeddings, MODE
         polarity_list.append(polarity)
     print('target_error_counter: ' + str(target_error_counter))
     return sentence_list, location_list, target_list, polarity_list
+
+# PREDICT FUNCTIONS
+def get_dataset_resources_test(data_filename, sent_word2idx, target_word2idx, word_set, max_sent_len):
+    ''' updates word2idx and word_set '''
+    if len(sent_word2idx) == 0:
+        sent_word2idx["<pad>"] = 0
+
+    test_data = load_and_clean_test(data_filename)
+
+    text = np.array(test_data['text'])
+    aspects = np.array(test_data['aspect_term'])
+    t_sentences = np.array(map(lambda x, y: replace_with_token(x, y), text, aspects))
+
+    word_count = []
+    sent_word_count = []
+    target_count = []
+
+    words = []
+    sentence_words = []
+    target_words = []
+
+    for i in range(t_sentences.shape[0]):
+        sentence = t_sentences[i]
+        target = aspects[i].lower()
+
+        sentence.replace("$t$", "")
+        sentence = sentence.lower()
+        sentence_splitted = text_to_word_sequence(sentence)
+        target_splitted = text_to_word_sequence(target)
+        sentence = ' '.join(text_to_word_sequence(sentence))
+        target = ' '.join(text_to_word_sequence(target))
+
+        max_sent_len = max(max_sent_len, len(sentence_splitted))
+        sentence_words.extend(sentence_splitted)
+        target_words.extend([target])
+        words.extend(sentence_splitted + target_splitted)
+
+    sent_word_count.extend(Counter(sentence_words).most_common())
+    target_count.extend(Counter(target_words).most_common())
+    word_count.extend(Counter(words).most_common())
+
+    for word, _ in sent_word_count:
+        if word not in sent_word2idx:
+            sent_word2idx[word] = len(sent_word2idx)
+
+    for target, _ in target_count:
+        if target not in target_word2idx:
+            target_word2idx[target] = len(target_word2idx)
+
+    for word, _ in word_count:
+        if word not in word_set:
+            word_set[word] = 1
+    return max_sent_len
+
+def get_dataset_test(data_filename, sent_word2idx, target_word2idx, embeddings):
+    ''' returns the dataset'''
+    sentence_list = []
+    location_list = []
+    target_list = []
+    # polarity_list = []
+
+    test_data = load_and_clean_test(data_filename)
+
+    text = np.array(test_data['text'])
+    aspects = np.array(test_data['aspect_term'])
+    # polarities = np.array(test_data['class']) # no classes!
+    t_sentences = np.array(map(lambda x, y: replace_with_token(x, y), text, aspects))
+
+    target_error_counter = 0
+    lower_bound = 0
+    upper_bound = text.shape[0]
+    print('lower_bound: ' + str(lower_bound))
+    print('upper_bound: ' + str(upper_bound))
+
+    for i in range(lower_bound, upper_bound):
+        sentence = t_sentences[i].lower()
+        target = aspects[i].lower()
+        # polarity = polarities[i] + 1
+
+        sent_words = text_to_word_sequence(sentence)
+        target_words = text_to_word_sequence(target)
+        sentence = ' '.join(text_to_word_sequence(sentence))
+        target = ' '.join(text_to_word_sequence(target))
+        target_location = -1
+        for idx, s in enumerate(sent_words):
+            if s == 't':
+                target_location = idx
+
+        if target_location == -1:
+            print(sentence)
+            print(sent_words)
+            print(target)
+            print(target_words)
+            for idx, s in enumerate(sent_words):
+                target_temp = target_words[0]
+            print(sent_words.index(target_temp))
+            print('target_location: -1')
+            target_error_counter += 1
+
+        is_included_flag = 1
+        id_tokenised_sentence = []
+        location_tokenised_sentence = []
+
+        for index, word in enumerate(sent_words):
+            if word == 't':
+                continue
+            try:
+                word_index = sent_word2idx[word]
+            except:
+                print(word)
+                print("id not found for word in the sentence TEST")
+                exit()
+
+            location_info = abs(index - target_location)
+
+            if word in embeddings:
+                id_tokenised_sentence.append(word_index)
+                location_tokenised_sentence.append(location_info)
+
+        is_included_flag = 0
+        for word in target_words:
+            if word in embeddings:
+                is_included_flag = 1
+                break
+
+        try:
+            target_index = target_word2idx[target]
+        except:
+            print(target)
+            print("id not found for target TEST")
+            exit()
+
+        if not is_included_flag:
+            print(sentence)
+            continue
+
+        sentence_list.append(id_tokenised_sentence)
+        location_list.append(location_tokenised_sentence)
+        target_list.append(target_index)
+        # polarity_list.append(polarity)
+    print('target_error_counter: ' + str(target_error_counter))
+    return sentence_list, location_list, target_list
+
+def load_and_clean_test(dataset):
+    if dataset == 'tech':
+        PATH = 'data_1_test.csv'
+    else:
+        PATH = 'data_2_test.csv'
+    # read into pandas csv
+    test_data = pd.read_csv('data/' + PATH, error_bad_lines=False, skipinitialspace=True)
+
+    # rename columns to remove whitespaces
+    test_data.columns = ['example_id', 'text', 'aspect_term', 'term_location']
+
+    # replace _ with whitespace and [comma] with ,
+    test_data['text'] = test_data['text'].str.replace('_ ', '')
+    test_data['text'] = test_data['text'].str.replace("\[comma\]", ',')
+
+    print('test_data shape: ' + str(test_data.shape))
+
+    return test_data
