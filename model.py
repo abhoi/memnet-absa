@@ -6,6 +6,7 @@ import numpy as np
 import tensorflow as tf
 #from past.builtins import xrange
 import time as tim
+from data import *
 from sklearn.metrics import precision_recall_fscore_support as score
 
 class MemN2N(object):
@@ -242,7 +243,7 @@ class MemN2N(object):
       print('support: {}'.format(support))
       return cost, acc/float(len(source_data))
 
-    def predict(self, data):
+    def predict(self, data, raw_predict_data):
       source_data, source_loc_data, target_data = data
       N = int(math.ceil(len(source_data) / self.batch_size))
       cost = 0
@@ -288,9 +289,8 @@ class MemN2N(object):
                                                      self.target: target,
                                                      self.context: context,
                                                      self.mask: mask})
-
+        predictions = predictions[0]
         overall_predictions.append(predictions)
-
         # for b in xrange(self.batch_size):
         #   if raw_labels[b] == predictions[b]:
         #     acc = acc + 1
@@ -303,7 +303,7 @@ class MemN2N(object):
       # return cost, acc/float(len(source_data))
       return overall_predictions
 
-    def run(self, train_data, test_data, predict_data):
+    def run(self, train_data, test_data, predict_data, raw_predict_data):
       print('training...')
       self.sess.run(self.A.assign(self.pre_trained_context_wt))
       self.sess.run(self.ASP.assign(self.pre_trained_target_wt))
@@ -314,6 +314,14 @@ class MemN2N(object):
         test_loss, test_acc = self.test(test_data)
         print('train-loss=%.2f;train-acc=%.2f;test-acc=%.2f;' % (train_loss, train_acc, test_acc))
         self.log_loss.append([train_loss, test_loss])
-      predictions = self.predict(predict_data)
-      print(predictions)
-        
+      predictions = self.predict(predict_data, raw_predict_data)
+      # print(predictions)
+      # Write to CSV
+      raw_predict_data = raw_predict_data.values
+      text_id = raw_predict_data[:, 0]
+      tech_reviews, food_reviews = load_and_clean()
+      tech_reviews = tech_reviews.values
+      classes = tech_reviews[:, 4]
+      with open("output_tech.txt", "w") as text_file:
+        for i in range(raw_predict_data.shape[0]):
+          text_file.write(text_id[i] + ";;" + str(predictions[i] - 1) + ";;" + str(classes[i]) + "\n")

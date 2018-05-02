@@ -16,7 +16,7 @@ flags.DEFINE_integer("edim", 300, "internal state dimension [300]")
 flags.DEFINE_integer("lindim", 300, "linear part of the state [75]")
 flags.DEFINE_integer("nhop", 7, "number of hops [7]")
 flags.DEFINE_integer("batch_size", 1, "batch size to use during training [128]")
-flags.DEFINE_integer("nepoch", 3, "number of epoch to use during training [100]")
+flags.DEFINE_integer("nepoch", 1, "number of epoch to use during training [100]")
 flags.DEFINE_float("init_lr", 0.01, "initial learning rate [0.01]")
 flags.DEFINE_float("init_hid", 0.1, "initial internal state value [0.1]")
 flags.DEFINE_float("init_std", 0.05, "weight initialization std [0.05]")
@@ -61,8 +61,7 @@ def main(_):
     N_FOLDS = 2
     skf = StratifiedKFold(N_FOLDS, shuffle=True, random_state=1000)
     train_data = get_dataset(FLAGS.train_data, source_word2idx, target_word2idx, embeddings, MODE='train')
-    predict_data = get_dataset_test(FLAGS.predict_data, source_word2idx, target_word2idx, embeddings)
-
+    predict_data, raw_predict_data = get_dataset_test(FLAGS.predict_data, source_word2idx, target_word2idx, embeddings)
     # source_data_predict, source_loc_data_predict, target_data_predict = predict_data
     source_data, source_loc_data, target_data, target_label = train_data
 
@@ -93,7 +92,7 @@ def main(_):
         model = MemN2N(FLAGS, sess)
         model.build_model()
         # saver = tf.train.Saver()
-        model.run(train_data_inner, test_data_inner, predict_data)
+        model.run(train_data_inner, test_data_inner, predict_data, raw_predict_data)
         # saver.save(sess, './memnet-food') # SAVER FUNCTION
 
     # use this to restore model from disk

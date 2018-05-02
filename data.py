@@ -307,10 +307,10 @@ def get_dataset_test(data_filename, sent_word2idx, target_word2idx, embeddings):
                 target_location = idx
 
         if target_location == -1:
-            print(sentence)
-            print(sent_words)
-            print(target)
-            print(target_words)
+            #print(sentence)
+            #print(sent_words)
+            #print(target)
+            #print(target_words)
             for idx, s in enumerate(sent_words):
                 target_temp = target_words[0]
             print(sent_words.index(target_temp))
@@ -337,11 +337,11 @@ def get_dataset_test(data_filename, sent_word2idx, target_word2idx, embeddings):
                 id_tokenised_sentence.append(word_index)
                 location_tokenised_sentence.append(location_info)
 
-        is_included_flag = 0
-        for word in target_words:
-            if word in embeddings:
-                is_included_flag = 1
-                break
+        # is_included_flag = 0
+        # for word in target_words:
+        #     if word in embeddings:
+        #         is_included_flag = 1
+        #         break
 
         try:
             target_index = target_word2idx[target]
@@ -350,16 +350,16 @@ def get_dataset_test(data_filename, sent_word2idx, target_word2idx, embeddings):
             print("id not found for target TEST")
             exit()
 
-        if not is_included_flag:
-            print(sentence)
-            continue
+        # if not is_included_flag:
+        #     print(sentence)
+        #     continue
 
         sentence_list.append(id_tokenised_sentence)
         location_list.append(location_tokenised_sentence)
         target_list.append(target_index)
         # polarity_list.append(polarity)
     print('target_error_counter: ' + str(target_error_counter))
-    return sentence_list, location_list, target_list
+    return (sentence_list, location_list, target_list), test_data
 
 def load_and_clean_test(dataset):
     if dataset == 'tech':
