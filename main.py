@@ -16,7 +16,7 @@ flags.DEFINE_integer("edim", 300, "internal state dimension [300]")
 flags.DEFINE_integer("lindim", 300, "linear part of the state [75]")
 flags.DEFINE_integer("nhop", 7, "number of hops [7]")
 flags.DEFINE_integer("batch_size", 1, "batch size to use during training [128]")
-flags.DEFINE_integer("nepoch", 1, "number of epoch to use during training [100]")
+flags.DEFINE_integer("nepoch", 3, "number of epoch to use during training [100]")
 flags.DEFINE_float("init_lr", 0.01, "initial learning rate [0.01]")
 flags.DEFINE_float("init_hid", 0.1, "initial internal state value [0.1]")
 flags.DEFINE_float("init_std", 0.05, "weight initialization std [0.05]")
@@ -27,7 +27,7 @@ flags.DEFINE_string("train_data", "data/Laptops_Train.xml.seg",
                     "train gold data set path [./data/Laptops_Train.xml.seg]")
 flags.DEFINE_string("test_data", "data/Laptops_Test_Gold.xml.seg",
                     "test gold data set path [./data/Laptops_Test_Gold.xml.seg]")
-flags.DEFINE_string("predict_data", "tech", "test data [tech, food]")
+flags.DEFINE_string("predict_data", "food", "test data [tech, food]")
 flags.DEFINE_boolean("show", False, "print progress [False]")
 
 FLAGS = flags.FLAGS

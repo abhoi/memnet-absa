@@ -138,8 +138,6 @@ def get_dataset(data_file_name, sent_word2idx, target_word2idx, embeddings, MODE
 
     tech_reviews, food_reviews = load_and_clean()
 
-    # tech_reviews = tech_reviews.sample(frac=1).reset_index(drop=True)
-
     text = np.array(tech_reviews['text'])
     aspects = np.array(tech_reviews['aspect_term'])
     polarities = np.array(tech_reviews['class'])

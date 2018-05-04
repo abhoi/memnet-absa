@@ -320,8 +320,14 @@ class MemN2N(object):
       raw_predict_data = raw_predict_data.values
       text_id = raw_predict_data[:, 0]
       tech_reviews, food_reviews = load_and_clean()
-      tech_reviews = tech_reviews.values
-      classes = tech_reviews[:, 4]
+      food_reviews = food_reviews.values
+      classes = food_reviews[:, 4]
+      predict_acc = 0
+      for i in range(len(predictions)):
+        if int(predictions[i] - 1) == int(classes[i]):
+          #print(i, predictions[i], classes[i])
+          predict_acc += 1
+      print(predict_acc)
       with open("output_tech.txt", "w") as text_file:
         for i in range(raw_predict_data.shape[0]):
           text_file.write(text_id[i] + ";;" + str(predictions[i] - 1) + ";;" + str(classes[i]) + "\n")
